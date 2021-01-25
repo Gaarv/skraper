@@ -57,46 +57,6 @@ enum class Serialization(val extension: String) {
         override fun List<Post>.serialize(): String {
             return serialize(YAMLFactory())
         }
-    },
-
-    CSV("csv") {
-        override fun List<Post>.serialize(): String {
-            val csvModule = SimpleModule().apply {
-                addSerializer(Post::class.java, object : JsonSerializer<Post>() {
-                    override fun serialize(item: Post, jgen: JsonGenerator, serializerProvider: SerializerProvider) {
-                        with(jgen) {
-                            writeStartObject()
-                            writeStringField("ID", item.id)
-                            writeStringField("Text", item.text)
-                            writeStringField("Published at", item.publishedAt?.toString(10))
-                            writeStringField("Rating", item.rating?.toString(10).orEmpty())
-                            writeStringField("Comments count", item.commentsCount?.toString(10).orEmpty())
-                            writeStringField("Views count", item.viewsCount?.toString(10).orEmpty())
-                            writeStringField("Media", item.media.joinToString("   ") { it.url })
-                            writeEndObject()
-                        }
-                    }
-                })
-            }
-
-            val csvSchema = CsvSchema
-                    .builder()
-                    .addColumn("ID")
-                    .addColumn("Text")
-                    .addColumn("Published at")
-                    .addColumn("Rating")
-                    .addColumn("Comments count")
-                    .addColumn("Views count")
-                    .addColumn("Media")
-                    .build()
-                    .withHeader()
-
-
-            return mapper(CsvFactory())
-                    .registerModule(csvModule)
-                    .writer(csvSchema)
-                    .writeValueAsString(this)
-        }
     };
 
     abstract fun List<Post>.serialize(): String

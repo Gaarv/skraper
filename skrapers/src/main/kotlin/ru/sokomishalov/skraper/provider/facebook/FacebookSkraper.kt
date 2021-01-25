@@ -46,6 +46,7 @@ open class FacebookSkraper @JvmOverloads constructor(
     override suspend fun getPosts(path: String, limit: Int): List<Post> {
         val postsPath = path.substringBefore("/posts") + "/posts"
         val page = getPage(path = postsPath)
+        val pageInfo = getPageInfo(path = path)
 
         val posts = page.extractPosts(limit)
         val jsonData = page.extractJsonData()
@@ -57,6 +58,7 @@ open class FacebookSkraper @JvmOverloads constructor(
 
             Post(
                 id = id,
+                pageInfo = pageInfo
                 text = it.extractPostText(),
                 publishedAt = it.extractPostPublishDateTime(),
                 rating = metaInfoJson?.extractPostReactionCount(),
