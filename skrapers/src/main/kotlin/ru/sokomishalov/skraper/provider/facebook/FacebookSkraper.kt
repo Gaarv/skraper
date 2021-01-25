@@ -58,7 +58,7 @@ open class FacebookSkraper @JvmOverloads constructor(
 
             Post(
                 id = id,
-                pageInfo = pageInfo
+                pageInfo = pageInfo,
                 text = it.extractPostText(),
                 publishedAt = it.extractPostPublishDateTime(),
                 rating = metaInfoJson?.extractPostReactionCount(),
@@ -76,16 +76,18 @@ open class FacebookSkraper @JvmOverloads constructor(
 
             when {
                 isCommunity -> PageInfo(
+                    id = extractUserId(),
                     nick = path.removePrefix("/").removePrefix("pg/").substringBefore("/"),
-                    name = extractCommunityName(),
-                    description = extractCommunityDescription(),
+                    name = extractUserName(),
+                    description = "",
                     avatarsMap = singleImageMap(url = extractCommunityAvatar()),
                     coversMap = singleImageMap(url = extractCommunityCover())
                 )
                 else -> PageInfo(
+                    id = extractUserId(),
                     nick = path.removePrefix("/").substringBefore("/"),
                     name = extractUserName(),
-                    description = extractUserDescription(),
+                    description = "",
                     avatarsMap = singleImageMap(url = extractUserAvatar()),
                     coversMap = singleImageMap(url = extractUserCover())
                 )
@@ -208,9 +210,24 @@ open class FacebookSkraper @JvmOverloads constructor(
     }
 
     private fun Element.extractUserName(): String? {
-        return getFirstElementByAttributeValue("data-testid", "profile_name_in_profile_page")
-            ?.wholeText()
+        val metaTags = getElementsByTag("meta")
+        val metas: Map<String, String> = metaTags
+            .map { it.attr("property") to it.attr("content") }
+            .toMap()
+        val androidUrl = metas.getOrDefault("og:title", "")
+        val pattern = Regex("^\\w+( +\\w+)*$")
+        return pattern.find(androidUrl)?.value.orEmpty()
     }
+
+    private fun Element.extractUserId(): String? {
+        val metaTags = getElementsByTag("meta")
+        val metas: Map<String, String> = metaTags
+            .map { it.attr("property") to it.attr("content") }
+            .toMap()
+        val androidUrl = metas.getOrDefault("al:android:url", "")
+        val pattern = Regex("\\d+")
+        return pattern.find(androidUrl)?.value.orEmpty()
+}
 
     private fun Element.extractUserAvatar(): String? {
         return getFirstElementByClass("profilePicThumb")

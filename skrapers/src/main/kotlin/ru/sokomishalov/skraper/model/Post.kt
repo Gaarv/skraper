@@ -18,6 +18,7 @@ package ru.sokomishalov.skraper.model
 /**
  * Represents a provider some user/community/channel/topic/trend post.
  * @property id provider's internal post id
+ * @property pageInfo page info from this post
  * @property text title and/or description
  * @property publishedAt publish timestamp in seconds *(nullable - such data may not exist at all)
  * @property rating rating (likes, pins, etc.) count *(nullable - such data may not exist at all)
@@ -27,6 +28,7 @@ package ru.sokomishalov.skraper.model
  */
 data class Post(
     val id: String,
+    val pageInfo: PageInfo? = null,
     val text: String? = "",
     val publishedAt: UnixTimestamp? = null,
     val rating: Int? = null,
