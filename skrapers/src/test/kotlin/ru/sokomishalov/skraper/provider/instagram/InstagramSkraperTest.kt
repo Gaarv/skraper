@@ -38,13 +38,13 @@ class InstagramSkraperTest : SkraperTck() {
         assertPageInfo { skraper.getUserInfo(username = username) }
     }
 
-    @Test
+    @Test @Disabled
     fun `Check media resolving`() {
         assertMediaResolved(Video("https://www.instagram.com/p/B-flad2F5o7/"))
         assertMediaResolved(Image("https://www.instagram.com/p/B-gwQJelNjs/"))
     }
 
-    @Test
+    @Test @Disabled
     fun `Check media downloading`() {
         assertMediaDownloaded(Video("https://www.instagram.com/p/B-flad2F5o7/"))
     }
