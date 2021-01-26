@@ -49,13 +49,15 @@ class FacebookSkraperTest : SkraperTck() {
         assertPageInfo { skraper.getUserInfo(username = username) }
     }
 
-    @Test @Disabled
+    @Disabled
+    @Test
     fun `Check media resolving`() {
         assertMediaResolved(Video("https://www.facebook.com/UKGuff/videos/216184746137024/"))
         assertMediaResolved(Image("https://www.facebook.com/memes/posts/5367912719892938"))
     }
 
-    @Test @Disabled
+    @Disabled
+    @Test
     fun `Check media downloading`() {
         assertMediaDownloaded(Video("https://www.facebook.com/ShortVideoClips/videos/10153369665000012/"))
     }
