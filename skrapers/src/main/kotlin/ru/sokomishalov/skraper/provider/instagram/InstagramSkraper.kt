@@ -37,19 +37,52 @@ open class InstagramSkraper @JvmOverloads constructor(
 ) : Skraper {
 
     override suspend fun getPosts(path: String, limit: Int): List<Post> {
-        val account = getUserInfo(path = path)
+        val pageInfo = getPageInfo(path = path)
+        val userId = pageInfo?.id?.toLong()
 
-        return getPostsByUserId(account?.get("id")?.asLong(), limit)
+        val data = client.fetchJson(
+            url = baseUrl.buildFullURL(
+                path = "/graphql/query/",
+                queryParams = mapOf(
+                    "query_id" to gqlUserMediasQueryId,
+                    "id" to userId,
+                    "first" to limit
+                )
+            )
+        )
+
+        val postsNodes = data
+            ?.getByPath("data.user.edge_owner_to_timeline_media.edges")
+            ?.map { it["node"] }
+            .orEmpty()
+
+        return postsNodes.map {
+            with(it) {
+                Post(
+                    id = getString("id").orEmpty(),
+                    pageInfo = pageInfo,
+                    text = getString("edge_media_to_caption.edges.0.node.text").orEmpty(),
+                    publishedAt = getLong("taken_at_timestamp"),
+                    rating = getInt("edge_media_preview_like.count"),
+                    viewsCount = getInt("video_view_count"),
+                    commentsCount = getInt("edge_media_to_comment.count"),
+                    media = extractPostMediaItems()
+                )
+            }
+        }
     }
 
     override suspend fun getPageInfo(path: String): PageInfo? {
         val account = getUserInfo(path = path)
+        val postsCount = account?.getInt("edge_owner_to_timeline_media.count")
 
         return account?.run {
             PageInfo(
+                id = getString("id"),
                 nick = getString("username"),
                 name = getString("full_name"),
                 description = getString("biography"),
+                postsCount = postsCount,
                 avatarsMap = mapOf(
                     SMALL to getString("profile_pic_url").orEmpty().toImage(),
                     MEDIUM to getString("profile_pic_url").orEmpty().toImage(),
@@ -72,38 +105,6 @@ open class InstagramSkraper @JvmOverloads constructor(
         )
 
         return json?.getByPath("graphql.user")
-    }
-
-    internal suspend fun getPostsByUserId(userId: Long?, limit: Int): List<Post> {
-        val data = client.fetchJson(
-            url = baseUrl.buildFullURL(
-                path = "/graphql/query/",
-                queryParams = mapOf(
-                    "query_id" to gqlUserMediasQueryId,
-                    "id" to userId,
-                    "first" to limit
-                )
-            )
-        )
-
-        val postsNodes = data
-            ?.getByPath("data.user.edge_owner_to_timeline_media.edges")
-            ?.map { it["node"] }
-            .orEmpty()
-
-        return postsNodes.map {
-            with(it) {
-                Post(
-                    id = getString("id").orEmpty(),
-                    text = getString("edge_media_to_caption.edges.0.node.text").orEmpty(),
-                    publishedAt = getLong("taken_at_timestamp"),
-                    rating = getInt("edge_media_preview_like.count"),
-                    viewsCount = getInt("video_view_count"),
-                    commentsCount = getInt("edge_media_to_comment.count"),
-                    media = extractPostMediaItems()
-                )
-            }
-        }
     }
 
     private fun JsonNode.extractPostMediaItems(): List<Media> {

@@ -16,6 +16,7 @@
 package ru.sokomishalov.skraper.client.ktor
 
 import io.ktor.client.*
+import io.ktor.client.engine.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.content.*
@@ -78,6 +79,9 @@ class KtorSkraperClient(
         @JvmStatic
         val DEFAULT_CLIENT: HttpClient = HttpClient {
             followRedirects = true
+            engine {
+                proxy = ProxyBuilder.http("http://proxy-vpn:8118")
+            }
         }
     }
 }

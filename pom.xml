@@ -36,7 +36,6 @@
     <modules>
         <module>skrapers</module>
         <module>cli</module>
-        <module>telegram-bot</module>
     </modules>
 
     <build>
