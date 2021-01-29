@@ -79,9 +79,9 @@ class KtorSkraperClient(
         @JvmStatic
         val DEFAULT_CLIENT: HttpClient = HttpClient {
             followRedirects = true
-            // engine {
-            //     proxy = ProxyBuilder.http("http://proxy-vpn:8118")
-            // }
+            engine {
+                proxy = ProxyBuilder.http("http://proxy-tor:8118")
+            }
         }
     }
 }

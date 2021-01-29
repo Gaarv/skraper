@@ -40,7 +40,7 @@ import ru.sokomishalov.skraper.model.*
  */
 open class FacebookSkraper @JvmOverloads constructor(
     override val client: SkraperClient = DefaultBlockingSkraperClient,
-    override val baseUrl: URLString = "https://facebook.com"
+    override val baseUrl: URLString = "https://www.facebook.com"
 ) : Skraper {
 
     override suspend fun getPosts(path: String, limit: Int): List<Post> {
