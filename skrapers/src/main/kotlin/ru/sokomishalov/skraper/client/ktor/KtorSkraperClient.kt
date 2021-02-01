@@ -77,10 +77,16 @@ class KtorSkraperClient(
 
     companion object {
         @JvmStatic
-        val DEFAULT_CLIENT: HttpClient = HttpClient {
-            followRedirects = true
-            engine {
-                proxy = ProxyBuilder.http(System.getenv("HTTP_PROXY") ?: "")
+        val DEFAULT_CLIENT: HttpClient = if (System.getenv("HTTP_PROXY").isNullOrEmpty()) {
+            HttpClient {
+                followRedirects = true
+            }
+        } else {
+            HttpClient {
+                followRedirects = true
+                engine {
+                    proxy = ProxyBuilder.http(System.getenv("HTTP_PROXY"))
+                }
             }
         }
     }

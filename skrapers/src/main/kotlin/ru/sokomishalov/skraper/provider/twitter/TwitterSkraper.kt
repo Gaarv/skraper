@@ -42,6 +42,7 @@ open class TwitterSkraper @JvmOverloads constructor(
 
     override suspend fun getPosts(path: String, limit: Int): List<Post> {
         val page = getUserPage(path = path)
+        val pageInfo = getPageInfo(path = path)
 
         val posts = page
             ?.body()
@@ -55,6 +56,7 @@ open class TwitterSkraper @JvmOverloads constructor(
             with(it) {
                 Post(
                     id = extractTweetId(),
+                    pageInfo = pageInfo,
                     text = extractTweetText(),
                     rating = extractTweetLikes(),
                     commentsCount = extractTweetReplies(),
@@ -74,6 +76,7 @@ open class TwitterSkraper @JvmOverloads constructor(
 
         return userJson?.run {
             PageInfo(
+                id = getString("id_str"),
                 nick = getString("screen_name"),
                 name = getString("name"),
                 description = getString("description"),
